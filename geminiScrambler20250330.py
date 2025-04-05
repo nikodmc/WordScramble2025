@@ -108,10 +108,13 @@ font_small = pygame.font.Font(None, 24)
 
 # Word list (you can expand this)
 word_list = ["PYTHON", "GAME", "SCRAMBLE", "CODING", "PYGAME", "DEVELOPER"]
+word_dict = {"mephitic": "(especially of a gas or vapor) foul-smelling; noxious",
+             "suppurate": "undergo the formation of pus; fester"}
 
 def choose_word():
     """Selects a random word from the word list."""
-    return random.choice(word_list).upper()
+    #return random.choice(word_list).upper()
+    return random.choice(list(word_dict.keys())).upper()
 
 def scramble_word(word):
     """Scrambles the letters of a word."""
@@ -149,6 +152,10 @@ def display_input_box2(user_input):
     text_surface = font_medium.render(user_input, True, black)
     text_rect = text_surface.get_rect(center=input_box_rect.center)
     screen.blit(text_surface, text_rect)
+    
+        
+def word_definition_display_box(word_to_guess):
+    display_message(word_dict.get(word_to_guess), black, -200, "medium")
 
 def remove_letter(word, letter):
     """remove the left most copy of specified letter, return word without letter"""
@@ -159,7 +166,8 @@ def remove_letter(word, letter):
         
         return word
 
-
+word_to_guess = choose_word()
+word_dict.get(word_to_guess.lower())
 
 
 def game_loop():
@@ -170,6 +178,8 @@ def game_loop():
     user_input2 = word_to_guess
     feedback = ""
     running = True
+    displayDef = False
+    removeLetters = 0
 
     while running:
         screen.fill(white)
@@ -199,14 +209,45 @@ def game_loop():
                     scrambled = scramble_word(scrambled)
                     
                 elif event.unicode.isalpha(): # Only allow letters
-                    if event.unicode.upper() in scrambled:
+                    if event.unicode.upper() in scrambled: #only allow letters in the word
                         user_input += event.unicode
                         scrambled = scrambled.replace(event.unicode.upper(), "_", 1)
                         user_input2 = scrambled
+                
+                elif event.unicode == "=":
+                    displayDef = True
+                
+                elif event.unicode == "-":
+                    displayDef = False
+                
+                elif event.unicode.isdigit():
+                    removeLetters = int(event.unicode)
+                   
+                     
+                
+               
+        #issues here:         
+            #getting the letters to be masked while still getting
+            #other functionality to work (scrambling with _ for used letters)
+            #get the stars to be any letter in  #only allow letters in the word
+            #function
+            #replace visible letters first, starred letters second.
+            #going to need to think about how best to do this.
+        if (removeLetters != 0) & (removeLetters < 9):
+            if removeLetters > len(word_to_guess):
+                removeLetters = len(word_to_guess)
+              
+            replacement = "*" * removeLetters
+          
+            scrambled = replacement + scrambled[removeLetters:]       
+                
                
         display_scrambled_word(scrambled)
         display_input_box(user_input)
         display_input_box2(user_input2)
+        if displayDef:
+            word_definition_display_box(word_to_guess.lower())
+        #word_definition_display_box(word_to_guess.lower())
         display_message(feedback, green if feedback == "Correct!" else red, 150)
 
         pygame.display.flip()
