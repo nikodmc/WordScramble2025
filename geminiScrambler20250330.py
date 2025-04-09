@@ -180,6 +180,7 @@ def game_loop():
     running = True
     displayDef = False
     removeLetters = 0
+    letterStack = ""
 
     while running:
         screen.fill(white)
@@ -188,8 +189,10 @@ def game_loop():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE:
-                    put_back_in_word = user_input[-1].upper()
+                if (event.key == pygame.K_BACKSPACE) and (len(user_input) > 0):
+                    # put_back_in_word = user_input[-1].upper()
+                    put_back_in_word = letterStack[-1].upper()
+                    letterStack = letterStack[:-1]
                     user_input = user_input[:-1]
                     scrambled = scrambled.replace("_", put_back_in_word, 1)
                     
@@ -198,11 +201,20 @@ def game_loop():
                         feedback = "Correct!"
                         word_to_guess = choose_word()
                         scrambled = scramble_word(word_to_guess)
-                        user_input = ""
+                        # user_input = ""
+                        if (removeLetters != 0) & (removeLetters < 9):
+                            if removeLetters > len(word_to_guess):
+                                removeLetters = len(word_to_guess)
+                              
+                            replacement = "*" * removeLetters
+                          
+                            scrambled = replacement + scrambled[removeLetters:] 
                     else:
                         feedback = "Incorrect. Try again!"
+                        scrambled = scrambled.replace("_", "") + letterStack
                     user_input = ""
-                    scrambled = scramble_word(word_to_guess)
+                    scrambled = scramble_word(scrambled)
+                    letterStack = ""
                     
                 elif event.key == pygame.K_SPACE:  # Allow spaces if you have words with spaces
                     #user_input += " "
@@ -213,6 +225,16 @@ def game_loop():
                         user_input += event.unicode
                         scrambled = scrambled.replace(event.unicode.upper(), "_", 1)
                         user_input2 = scrambled
+                        letterStack += event.unicode
+                        
+                    elif (removeLetters > 0) and ("*" in scrambled):
+                        user_input += event.unicode
+                        scrambled = scrambled.replace("*", "_", 1)
+                        #learn how to use a stack in python? Could help with 
+                        #some issues here?
+                        # last_added = "*"
+                        letterStack += "*"
+                        
                 
                 elif event.unicode == "=":
                     displayDef = True
@@ -222,29 +244,24 @@ def game_loop():
                 
                 elif event.unicode.isdigit():
                     removeLetters = int(event.unicode)
+                    
+                    if (removeLetters != 0) & (removeLetters < 9):
+                        if removeLetters > len(word_to_guess):
+                            removeLetters = len(word_to_guess)
+                          
+                        replacement = "*" * removeLetters
+                      
+                        scrambled = replacement + scrambled[removeLetters:] 
                    
                      
                 
                
-        #issues here:         
-            #getting the letters to be masked while still getting
-            #other functionality to work (scrambling with _ for used letters)
-            #get the stars to be any letter in  #only allow letters in the word
-            #function
-            #replace visible letters first, starred letters second.
-            #going to need to think about how best to do this.
-        if (removeLetters != 0) & (removeLetters < 9):
-            if removeLetters > len(word_to_guess):
-                removeLetters = len(word_to_guess)
-              
-            replacement = "*" * removeLetters
-          
-            scrambled = replacement + scrambled[removeLetters:]       
+
                 
                
         display_scrambled_word(scrambled)
         display_input_box(user_input)
-        display_input_box2(user_input2)
+        display_input_box2(letterStack)
         if displayDef:
             word_definition_display_box(word_to_guess.lower())
         #word_definition_display_box(word_to_guess.lower())
