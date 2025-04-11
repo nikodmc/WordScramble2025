@@ -188,7 +188,9 @@ def game_loop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                
             if event.type == pygame.KEYDOWN:
+                
                 if (event.key == pygame.K_BACKSPACE) and (len(user_input) > 0):
                     # put_back_in_word = user_input[-1].upper()
                     put_back_in_word = letterStack[-1].upper()
@@ -211,7 +213,7 @@ def game_loop():
                             scrambled = replacement + scrambled[removeLetters:] 
                     else:
                         feedback = "Incorrect. Try again!"
-                        scrambled = scrambled.replace("_", "") + letterStack
+                        scrambled = scrambled.replace("_", "") + letterStack.upper()
                     user_input = ""
                     scrambled = scramble_word(scrambled)
                     letterStack = ""
@@ -244,15 +246,19 @@ def game_loop():
                 
                 elif event.unicode.isdigit():
                     removeLetters = int(event.unicode)
+                    scrambled = scramble_word(word_to_guess)
                     
-                    if (removeLetters != 0) & (removeLetters < 9):
-                        if removeLetters > len(word_to_guess):
+                    if (removeLetters != 0):
+                        if (removeLetters > len(word_to_guess)) or (removeLetters == 9):
                             removeLetters = len(word_to_guess)
+                        
                           
                         replacement = "*" * removeLetters
                       
                         scrambled = replacement + scrambled[removeLetters:] 
                    
+                   
+                        
                      
                 
                
